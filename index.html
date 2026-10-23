@@ -195,11 +195,18 @@
     }
   }
 
-  function rect(x, y, w, h, r) {
+  function circle(x, y, r) {
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
-    else ctx.rect(x, y, w, h);
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  // Richtung von Feld a zu Feld b, auch wenn dazwischen der Rand liegt
+  function delta(a, b) {
+    let dx = b.x - a.x, dy = b.y - a.y;
+    if (Math.abs(dx) > 1) dx = -Math.sign(dx);
+    if (Math.abs(dy) > 1) dy = -Math.sign(dy);
+    return { x: dx, y: dy };
   }
 
   // Blumenrand: eine Reihe Blumen rund um das Spielfeld, einmal vorgezeichnet
@@ -253,21 +260,53 @@
     ctx.arc((food.x + 0.5) * c, (food.y + 0.5) * c, c * 0.36, 0, Math.PI * 2);
     ctx.fill();
 
-    snake.forEach((s, i) => {
-      ctx.fillStyle = i === 0 ? '#22c55e' : '#4ade80';
-      rect(s.x * c + c * 0.08, s.y * c + c * 0.08, c * 0.84, c * 0.84, c * 0.25);
-    });
+    // Raupe: vom Schwanz zum Kopf zeichnen, damit der Kopf obenauf liegt
+    const now = performance.now();
+    for (let i = snake.length - 1; i > 0; i--) {
+      const s = snake[i];
+      const d = delta(s, snake[i - 1]);
+      const x = (s.x + 0.5) * c, y = (s.y + 0.5) * c;
 
-    // Augen in Blickrichtung
+      // Beinchen, die leicht wackeln
+      const wiggle = Math.sin(now / 90 + i * 1.3) * c * 0.08;
+      ctx.fillStyle = '#365314';
+      for (const side of [-1, 1]) {
+        circle(x + side * d.y * c * 0.42 + d.x * wiggle,
+               y + side * d.x * c * 0.42 + d.y * wiggle, c * 0.09);
+      }
+
+      ctx.fillStyle = i % 2 ? '#84cc16' : '#65a30d';
+      circle(x, y, i === snake.length - 1 ? c * 0.38 : c * 0.47);
+      ctx.fillStyle = '#facc15';
+      circle(x, y, c * 0.08);
+    }
+
+    // Kopf mit Augen und Fühlern
     const h = snake[0];
     const cx = (h.x + 0.5) * c, cy = (h.y + 0.5) * c;
-    ctx.fillStyle = '#10141a';
+    ctx.strokeStyle = '#3f6212';
+    ctx.lineWidth = c * 0.07;
+    ctx.lineCap = 'round';
     for (const side of [-1, 1]) {
-      const ex = cx + dir.x * c * 0.18 + dir.y * side * c * 0.2;
-      const ey = cy + dir.y * c * 0.18 + dir.x * side * c * 0.2;
+      const tx = cx + dir.x * c * 0.7 + side * dir.y * c * 0.38;
+      const ty = cy + dir.y * c * 0.7 + side * dir.x * c * 0.38;
       ctx.beginPath();
-      ctx.arc(ex, ey, c * 0.09, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(cx + dir.x * c * 0.3 + side * dir.y * c * 0.15,
+                 cy + dir.y * c * 0.3 + side * dir.x * c * 0.15);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      circle(tx, ty, c * 0.08);
+    }
+    ctx.fillStyle = '#a3e635';
+    circle(cx, cy, c * 0.5);
+    for (const side of [-1, 1]) {
+      const ex = cx + dir.x * c * 0.14 + side * dir.y * c * 0.2;
+      const ey = cy + dir.y * c * 0.14 + side * dir.x * c * 0.2;
+      ctx.fillStyle = '#ffffff';
+      circle(ex, ey, c * 0.13);
+      ctx.fillStyle = '#10141a';
+      circle(ex + dir.x * c * 0.05, ey + dir.y * c * 0.05, c * 0.065);
     }
     ctx.restore();
   }
