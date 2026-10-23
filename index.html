@@ -176,8 +176,11 @@
 
   function step() {
     if (queue.length) dir = queue.shift();
-    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-    if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N) return gameOver();
+    // Durch die Wand wie bei Snake II: auf der Gegenseite wieder herauskommen
+    const head = {
+      x: (snake[0].x + dir.x + N) % N,
+      y: (snake[0].y + dir.y + N) % N,
+    };
     const eating = head.x === food.x && head.y === food.y;
     const body = eating ? snake : snake.slice(0, -1);
     if (body.some(s => s.x === head.x && s.y === head.y)) return gameOver();
