@@ -199,9 +199,46 @@
     ctx.fill();
   }
 
+  // Blumenrand: eine Reihe Blumen rund um das Spielfeld, einmal vorgezeichnet
+  let frame;
+  const PETALS = ['#f472b6', '#c084fc', '#fbbf24', '#f9fafb', '#fb7185', '#60a5fa'];
+
+  function drawFlower(f, x, y, c, color, rot) {
+    f.fillStyle = color;
+    for (let k = 0; k < 5; k++) {
+      const a = rot + k * Math.PI * 2 / 5;
+      f.beginPath();
+      f.arc(x + Math.cos(a) * c * 0.2, y + Math.sin(a) * c * 0.2, c * 0.17, 0, Math.PI * 2);
+      f.fill();
+    }
+    f.fillStyle = color === '#fbbf24' ? '#ea580c' : '#fde047';
+    f.beginPath();
+    f.arc(x, y, c * 0.12, 0, Math.PI * 2);
+    f.fill();
+  }
+
+  function buildFrame() {
+    frame = document.createElement('canvas');
+    frame.width = frame.height = canvas.width;
+    const f = frame.getContext('2d');
+    const c = canvas.width / (N + 2);
+    f.fillStyle = '#1f3a2a';
+    f.fillRect(0, 0, frame.width, frame.height);
+    f.clearRect(c, c, N * c, N * c);
+    for (let y = 0; y < N + 2; y++)
+      for (let x = 0; x < N + 2; x++) {
+        if (x > 0 && y > 0 && x < N + 1 && y < N + 1) continue;
+        drawFlower(f, (x + 0.5) * c, (y + 0.5) * c, c,
+          PETALS[(x * 7 + y * 3) % PETALS.length], (x + y) * 0.6);
+      }
+  }
+
   function draw() {
-    const c = canvas.width / N;
+    const c = canvas.width / (N + 2);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(frame, 0, 0);
+    ctx.save();
+    ctx.translate(c, c);
 
     ctx.fillStyle = '#1d242e';
     for (let y = 0; y < N; y++)
@@ -229,6 +266,7 @@
       ctx.arc(ex, ey, c * 0.09, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.restore();
   }
 
   function loop(t) {
@@ -247,6 +285,7 @@
   function resize() {
     const size = Math.round(canvas.clientWidth * (window.devicePixelRatio || 1));
     canvas.width = canvas.height = size;
+    buildFrame();
   }
 
   // Tastatur
