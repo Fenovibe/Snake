@@ -15,3 +15,4 @@ Grundregeln (Sprache, Dateinamen, Datenschutz) stehen in `../CLAUDE.md`.
 - Öffentliches Repository auf GitHub: https://github.com/Fenovibe/Snake (auf Wunsch eingerichtet am 23.10.2026).
 - Online spielbar über GitHub Pages: https://fenovibe.github.io/Snake/ (wird nach jedem Push auf `main` neu gebaut).
 - Repository ist öffentlich: keine persönlichen Daten committen.
+- Nach jeder Änderung committen und direkt auf GitHub pushen, ohne Rückfrage (so gewünscht, gilt nur für dieses Projekt).
